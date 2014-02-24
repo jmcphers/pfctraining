@@ -427,9 +427,17 @@ function pfctrain_replaceshortcodes ($content)
 			if (strpos($content, "White Papers") !== false) 
 			{
 				$body = '<h2>White Papers</h2>
-				<p>Welcome to PFC White Papers, ' . $_SESSION["loggedinuser"] . '.</p>';
+				<p>Welcome to PFC White Papers, ' . $_SESSION["loggedinuser"] . '.</p>
+				<p><small><small><strong>Jump to</strong> ';
 				$categories = array("Whitepaper");
 				$whitepapers = true;
+				$query = 'select * from '. $wpdb->prefix . 'pfctraining_courses where type="Whitepaper" order by number';
+				$data = mysql_query($query);
+				while ($row = mysql_fetch_assoc($data))
+				{
+					$body = $body . " | <a href='#whitepaper-" . $row["id"] . "'>" . $row["title"] . "</a>";
+				}
+				$body .= "</small></small></p>";
 			}
 			else
 			{
@@ -459,7 +467,7 @@ function pfctrain_replaceshortcodes ($content)
 
 					if ($whitepapers)
 					{
-						$body = $body . "<a href='" . $coursecounter . "&mediatype=WhitePaper&mediafile=" . $row["pdflink"] . "' target='_blank'><img src='" . $row["imagelink"] . "' style='float: left; border: 0px;' /></a><h3>" . $row["title"] . "</h3><p>" . $row["description"] . "</p><br style='clear: both;' />";
+						$body = $body . "<a id='whitepaper-" . $row["id"] . "' href='" . $coursecounter . "&mediatype=WhitePaper&mediafile=" . $row["pdflink"] . "' target='_blank'><img src='" . $row["imagelink"] . "' style='float: left; border: 0px;' /></a><h3>" . $row["title"] . "</h3><p>" . $row["description"] . "</p><br style='clear: both;' />";
 					}
 					else
 					{
