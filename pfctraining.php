@@ -442,8 +442,21 @@ function pfctrain_replaceshortcodes ($content)
 			else
 			{
 				$body = '<h2>Online Training Courses</h2>
-				<p>Welcome to PFC Online Training, ' . $_SESSION["loggedinuser"] . '.</p>';
+				<p>Welcome to PFC Online Training, ' . $_SESSION["loggedinuser"] . '.</p>
+				<p><small><small><strong>Jump to</strong><br /> ';
 				$categories = array("Basic", "Advanced", "Elective");
+				foreach ($categories as $category)
+				{
+					$body .= $category;
+					$query = 'select * from '. $wpdb->prefix . 'pfctraining_courses where type="' . $category . '" order by number';
+					$data = mysql_query($query);
+					while ($row = mysql_fetch_assoc($data))
+					{
+						$body .= " | <a href='#course-" . $row["id"] . "'>" . $row["title"] . "</a>";
+					}
+					$body .= "<br />";
+				}
+				$body .= "</small></small></p>";
 			}
 			foreach ($categories as $category)
 			{
@@ -471,8 +484,7 @@ function pfctrain_replaceshortcodes ($content)
 					}
 					else
 					{
-						$body = $body . "<h3>" . $row["number"] . " - " . $row["title"] .
-			"</h3>" .
+						$body = $body . "<a id='course-" . $row["id"] . "'> <h3>" . $row["number"] . " - " . $row["title"] .  "</h3></a>" .
 						"<p>" . $row["description"] . "<br/>";
 						if (strlen($row["audiolink"]) > 0)
 						{
