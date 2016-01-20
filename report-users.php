@@ -12,7 +12,7 @@ $query = "select "
 	. $wpdb->prefix . "pfctraining_users.id = "
 	. $wpdb->prefix . "pfctraining_coursestaken.userid group by "
 	. $wpdb->prefix . "pfctraining_users.id order by lastactivity desc";
-$data = mysql_query($query);
+$data = $wpdb->get_results($query, ARRAY_A);
 
 if (!$data) {
 	$message  = 'Invalid query: ' . mysql_error() . "\n";
@@ -23,7 +23,7 @@ if (!$data) {
 echo 'First name,Last name,E-mail address,Address,City,State,Zip,Country,Registered,Last Trained
 ';
 
-while ($row = mysql_fetch_assoc($data))
+foreach($data as $row)
 {
 	echo '"' . 
 		str_replace('"', '""', $row["first"]) . '","' .

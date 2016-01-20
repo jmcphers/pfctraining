@@ -77,14 +77,13 @@ function pfctrain_replaceshortcodes ($content)
 		if ($_POST["action"] == "Log in")
 		{
 			$query = 'select id, first, last from '. $wpdb->prefix . 'pfctraining_users where email="' . $_POST["email"] . '" and password="' . sha1($_POST["password"]) . '"';
-			$data = mysql_query($query);
+			$data = $wpdb->get_row($query, ARRAY_A);
 			if (!$data) {
 				$message  = 'Invalid query: ' . mysql_error() . "\n";
 				$message .= 'Whole query: ' . $query;
 				die($message);
 			}
-			$row = mysql_fetch_assoc($data);
-			if (!$row)
+			if (!$data->num_rows == 0)
 			{
 				$body = '<h2>Login failed</h2>
 				<p>Sorry, but we couldn\'t find a user registration with the e-mail address <em>' . $_POST["email"] . '</em> and the given password.  Try again below.</p>';
@@ -99,8 +98,7 @@ function pfctrain_replaceshortcodes ($content)
 		if ($_POST["action"] == "Submit Registration")
 		{
 			$query = 'select id from ' . $wpdb->prefix . 'pfctraining_users where email="' . $_POST["user_email"] . '"';
-			$data = mysql_query($query);
-			$row = mysql_fetch_assoc($data);
+			$row = $wpdb->get_row($query, ARRAY_A);
 			if ($row)
 			{
 				$body = '<p>Sorry, <em>' . $_POST["user_email"] . '</em> is already registered.</p>';
@@ -124,13 +122,12 @@ function pfctrain_replaceshortcodes ($content)
 					. '!' 
 					. '<form method="post"><input type="submit" name="action" value="Proceed to Courses" /></form>';
 				$query = 'select id from '. $wpdb->prefix . 'pfctraining_users where email="' . $_POST["user_email"] . '" and password="' . sha1($_POST["user_password"]) . '"';
-				$data = mysql_query($query);
+				$row = $wpdb->get_row($query, ARRAY_A);
 				if (!$data) {
 					$message  = 'Invalid query: ' . mysql_error() . "\n";
 					$message .= 'Whole query: ' . $query;
 					die($message);
 				}
-				$row = mysql_fetch_assoc($data);
 
 				$_SESSION["loggedinuser"] = $_POST["user_first"] . ' ' . $_POST["user_last"];
 				$_SESSION["loggedinuserid"] = $row["id"];
@@ -432,8 +429,8 @@ function pfctrain_replaceshortcodes ($content)
 				$categories = array("Whitepaper");
 				$whitepapers = true;
 				$query = 'select * from '. $wpdb->prefix . 'pfctraining_courses where type="Whitepaper" order by number';
-				$data = mysql_query($query);
-				while ($row = mysql_fetch_assoc($data))
+				$data = $wpdb->get_results($query, ARRAY_A);
+                foreach($data as $row)
 				{
 					$body = $body . " | <a href='#whitepaper-" . $row["id"] . "'>" . $row["title"] . "</a>";
 				}
@@ -449,8 +446,8 @@ function pfctrain_replaceshortcodes ($content)
 				{
 					$body .= $category;
 					$query = 'select * from '. $wpdb->prefix . 'pfctraining_courses where type="' . $category . '" order by number';
-					$data = mysql_query($query);
-					while ($row = mysql_fetch_assoc($data))
+					$data = $wpdb->get_results($query, ARRAY_A);
+					foreach($data as $row)
 					{
 						$body .= " | <a href='#course-" . $row["id"] . "'>" . $row["title"] . "</a>";
 					}
@@ -465,13 +462,13 @@ function pfctrain_replaceshortcodes ($content)
 					$body = $body . '<h3 style="border-bottom: 1px dotted black;">' . $category . ' Courses</h3>';
 				}
 				$query = 'select * from '. $wpdb->prefix . 'pfctraining_courses where type="' . $category . '" order by number';
-				$data = mysql_query($query);
+				$data = $wpdb->get_results($query, ARRAY_A);
 				if (!$data) {
 					$message  = 'Invalid query: ' . mysql_error() . "\n";
 					$message .= 'Whole query: ' . $query;
 					die($message);
 				}
-				while ($row = mysql_fetch_assoc($data))
+				foreach($data as $row)
 				{
 					$coursecounter = '/wp-content/plugins/pfctraining/coursecounter.php?userid='
 						. $_SESSION["loggedinuserid"]
@@ -538,6 +535,7 @@ function pfctrain_replaceshortcodes ($content)
 function pfctrain_renderadminpage()
 {
 	global $wpdb;
+	$wpdb->show_errors();
 	
 	?>
 <form method="post">
@@ -552,23 +550,21 @@ function pfctrain_renderadminpage()
 <h3>User information</h3>
 <p>There are currently <?php
 	$query = 'select count(*) as users from '. $wpdb->prefix . 'pfctraining_users';
-	$data = mysql_query($query);
-	if (!$data) {
+	$row = $wpdb->get_row($query, ARRAY_A);
+	if (!$row) {
 	    $message  = 'Invalid query: ' . mysql_error() . "\n";
 	    $message .= 'Whole query: ' . $query;
 	    die($message);
 	}
-	$row = mysql_fetch_assoc($data);
 	echo $row["users"] . " registered online training users, who have taken courses ";
 
 	$query = 'select count(*) as taken from '. $wpdb->prefix . 'pfctraining_coursestaken';
-	$data = mysql_query($query);
-	if (!$data) {
+	$row = $wpdb->get_row($query, ARRAY_A);
+	if (!$row) {
 	    $message  = 'Invalid query: ' . mysql_error() . "\n";
 	    $message .= 'Whole query: ' . $query;
 	    die($message);
 	}
-	$row = mysql_fetch_assoc($data);
 	echo $row["taken"] . " times";
 ?></p>
 <h3>Add a course</h3>
@@ -604,13 +600,12 @@ if ($_POST["form-action"] == "execute")
 }
 
 $query = 'select count(*) as courses from '. $wpdb->prefix . 'pfctraining_courses';
-$data = mysql_query($query);
-if (!$data) {
+$row = $wpdb->get_row($query, ARRAY_A);
+if (!$row) {
 	$message  = 'Invalid query: ' . mysql_error() . "\n";
 	$message .= 'Whole query: ' . $query;
 	die($message);
 }
-$row = mysql_fetch_assoc($data);
 echo "There are " . $row["courses"] . " courses in the database.";
 ?>
 </p>

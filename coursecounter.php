@@ -6,7 +6,7 @@ $query = 'insert into ' . $wpdb->prefix . 'pfctraining_coursestaken (courseid, u
 		. $wpdb->escape($_GET['courseid']) . ', '
 		. $wpdb->escape($_GET['userid']) . ', "'
 		. $wpdb->escape($_GET['mediatype']) . '");';
-$data = mysql_query($query);
+$wpdb->query($query);
 
 header('Location: ' . $_GET['mediafile']);
 ?>

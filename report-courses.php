@@ -22,12 +22,12 @@ if ($_GET["last30"] == "1")
 
 $query = $query . " order by takenon desc;";
 
-$data = mysql_query($query);
+$data = $wpdb->get_results($query, ARRAY_A);
 
 echo 'First name,Last name,E-mail address,Course #,Course Title,Date Taken,Format
 ';
 
-while ($row = mysql_fetch_assoc($data))
+foreach($data as $row)
 {
 	echo $row["first"] . ',' .
 		$row["last"] . ',' .

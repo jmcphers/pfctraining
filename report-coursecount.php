@@ -17,7 +17,7 @@ $query = "select "
 	. $wpdb->prefix . "pfctraining_courses.id ";
 
 
-$data = mysql_query($query);
+$data = $wpdb->get_results($query, ARRAY_A);
 if (!$data) {
 	$message  = 'Invalid query: ' . mysql_error() . "\n";
 	$message .= 'Whole query: ' . $query;
@@ -27,7 +27,7 @@ if (!$data) {
 echo 'Course Description,Users,MP3,PDF
 ';
 
-while ($row = mysql_fetch_assoc($data))
+foreach($data as $row))
 {
 	echo $row["title"] . ',' .
 		$row["users"] . ',' .
