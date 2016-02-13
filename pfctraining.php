@@ -78,12 +78,7 @@ function pfctrain_replaceshortcodes ($content)
 		{
 			$query = 'select id, first, last from '. $wpdb->prefix . 'pfctraining_users where email="' . $_POST["email"] . '" and password="' . sha1($_POST["password"]) . '"';
 			$data = $wpdb->get_row($query, ARRAY_A);
-			if (!$data) {
-				$message  = 'Invalid query: ' . mysql_error() . "\n";
-				$message .= 'Whole query: ' . $query;
-				die($message);
-			}
-			if (!$data->num_rows == 0)
+			if ($data == null)
 			{
 				$body = '<h2>Login failed</h2>
 				<p>Sorry, but we couldn\'t find a user registration with the e-mail address <em>' . $_POST["email"] . '</em> and the given password.  Try again below.</p>';
@@ -91,8 +86,8 @@ function pfctrain_replaceshortcodes ($content)
 			}
 			else
 			{
-				$_SESSION["loggedinuser"] = $row["first"] . ' ' . $row["last"];
-				$_SESSION["loggedinuserid"] = $row["id"];
+				$_SESSION["loggedinuser"] = $data["first"] . ' ' . $data["last"];
+				$_SESSION["loggedinuserid"] = $data["id"];
 			}
 		}
 		if ($_POST["action"] == "Submit Registration")
@@ -121,16 +116,9 @@ function pfctrain_replaceshortcodes ($content)
 					.  $_POST["user_last"]
 					. '!' 
 					. '<form method="post"><input type="submit" name="action" value="Proceed to Courses" /></form>';
-				$query = 'select id from '. $wpdb->prefix . 'pfctraining_users where email="' . $_POST["user_email"] . '" and password="' . sha1($_POST["user_password"]) . '"';
-				$row = $wpdb->get_row($query, ARRAY_A);
-				if (!$data) {
-					$message  = 'Invalid query: ' . mysql_error() . "\n";
-					$message .= 'Whole query: ' . $query;
-					die($message);
-				}
 
 				$_SESSION["loggedinuser"] = $_POST["user_first"] . ' ' . $_POST["user_last"];
-				$_SESSION["loggedinuserid"] = $row["id"];
+				$_SESSION["loggedinuserid"] = $wpdb->insert_id;
 			}
 		}
 		if ($_POST["action"] == "Register")
